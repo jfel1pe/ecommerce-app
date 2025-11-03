@@ -34,5 +34,15 @@ model Product {
   size        String
   color       String
   stock       Int
+  imageUrl    String?   // ← nuevo campo opcional
   createdAt   DateTime @default(now())
+}
+
+// 5. Modelo del carrito
+model Cart {
+  id         Int      @id @default(autoincrement())
+  product    String
+  quantity   Int
+  totalPrice Float
+  createdAt  DateTime @default(now())
 }
