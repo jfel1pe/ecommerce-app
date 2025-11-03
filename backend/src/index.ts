@@ -1,20 +1,17 @@
 import express from "express";
-import prisma from "./config/prisma";
-
 import dotenv from "dotenv";
+import userRoutes from "./routes/userRoutes.ts";
+
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(express.json()); // para leer JSON en las peticiones
 
-// Ruta para probar conexión a BD
-app.get("/users", async (req, res) => {
-  const users = await prisma.user.findMany();
-  res.json(users);
-});
+// ✅ Ruta base para usuarios
+app.use("/users", userRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Servidor escuchando en http://localhost:${PORT}`);
+  console.log(`Servidor funcionando correctamente en el puerto ${PORT}`);
 });

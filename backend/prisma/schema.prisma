@@ -15,11 +15,24 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// 3. Modelo de ejemplo: usuario
+// 3. Modelo de usuario
 model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
+}
+
+// 4. Modelo de producto
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  category    String
+  size        String
+  color       String
+  stock       Int
+  createdAt   DateTime @default(now())
 }
