@@ -1,5 +1,17 @@
-node_modules
-# Keep environment variables out of version control
+# Dependencias
+node_modules/
+
+# Variables de entorno
 .env
 
-/src/generated/prisma
+# Archivos de build (si compilas con TypeScript más adelante)
+dist/
+
+# Archivos de Prisma que no deben subirse
+prisma/dev.db
+prisma/.DS_Store
+*.log
+
+# Configuración del sistema (Windows/macOS)
+.DS_Store
+Thumbs.db
