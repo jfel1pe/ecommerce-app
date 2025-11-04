@@ -22,11 +22,14 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
+
+  cart      Cart?
+  orders    Order[]
 }
 
 // 4. Modelo de producto
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   description String
   price       Float
@@ -34,15 +37,54 @@ model Product {
   size        String
   color       String
   stock       Int
-  imageUrl    String?   // ← nuevo campo opcional
-  createdAt   DateTime @default(now())
+  imageUrl    String?
+  createdAt   DateTime  @default(now())
+
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
 }
 
 // 5. Modelo del carrito
 model Cart {
+  id         Int         @id @default(autoincrement())
+  userId     Int         @unique
+  user       User        @relation(fields: [userId], references: [id])
+  items      CartItem[]
+  total      Float       @default(0)
+  createdAt  DateTime    @default(now())
+}
+
+//6. Modelo del cartItems
+model CartItem {
   id         Int      @id @default(autoincrement())
-  product    String
+  cartId     Int
+  productId  Int
   quantity   Int
-  totalPrice Float
+  subtotal   Float
   createdAt  DateTime @default(now())
+  cart       Cart      @relation(fields: [cartId], references: [id])
+  product    Product   @relation(fields: [productId], references: [id])
+}
+
+//7. Modelo de pedido
+model Order {
+  id        Int         @id @default(autoincrement())
+  userId    Int
+  user      User        @relation(fields: [userId], references: [id])
+  total     Float
+  status    String      @default("pendiente")
+  createdAt DateTime    @default(now())
+
+  items     OrderItem[]
+}
+
+//8. Items del pedido
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id])
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  subtotal  Float
 }
