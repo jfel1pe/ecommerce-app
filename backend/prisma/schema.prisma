@@ -21,6 +21,7 @@ model User {
   name      String
   email     String   @unique
   password  String
+  role      String   @default("USER") // "USER" o "ADMIN"
   createdAt DateTime @default(now())
 
   cart      Cart?
@@ -66,19 +67,28 @@ model CartItem {
   product    Product   @relation(fields: [productId], references: [id])
 }
 
-//7. Modelo de pedido
+//7. Estado del pedido enum
+enum OrderStatus {
+  pendiente
+  pagado
+  enviado
+  entregado
+  cancelado
+}
+
+//8. Modelo de pedido
 model Order {
-  id        Int         @id @default(autoincrement())
+  id        Int           @id @default(autoincrement())
   userId    Int
-  user      User        @relation(fields: [userId], references: [id])
+  user      User          @relation(fields: [userId], references: [id])
   total     Float
-  status    String      @default("pendiente")
-  createdAt DateTime    @default(now())
+  status    OrderStatus   @default(pendiente)
+  createdAt DateTime      @default(now())
 
   items     OrderItem[]
 }
 
-//8. Items del pedido
+//9. Items del pedido
 model OrderItem {
   id        Int      @id @default(autoincrement())
   orderId   Int

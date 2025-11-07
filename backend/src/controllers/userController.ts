@@ -13,16 +13,48 @@ export const getUsers = async (req: Request, res: Response) => {
   }
 };
 
-// Crear un nuevo usuario
+import { Request, Response } from "express";
+import bcrypt from "bcrypt";
+import { prisma } from "../config/prisma";
+
+/**
+ * Crear usuario (solo ADMIN)
+ */
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
+
+    // Validar que no exista el email
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: "El correo ya está registrado" });
+    }
+
+    // Encriptar la contraseña antes de guardar
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Crear el usuario
     const newUser = await prisma.user.create({
-      data: { name, email, password },
+      data: {
+        name,
+        email,
+        password: hashedPassword, // ✅ Guardamos el hash, no el texto plano
+        role: role || "USER",
+      },
     });
-    res.status(201).json(newUser);
+
+    res.json({
+      message: "Usuario creado correctamente por el administrador",
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ error: "Error al crear usuario" });
+    console.error("❌ Error en createUser:", error);
+    res.status(500).json({ error: "Error al crear el usuario" });
   }
 };
 

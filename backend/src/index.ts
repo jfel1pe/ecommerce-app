@@ -4,6 +4,8 @@ import userRoutes from "./routes/userRoutes.ts";
 import productRoutes from "./routes/productRoutes.ts"
 import cartRoutes from "./routes/cartRoutes.ts";
 import orderRoutes from "./routes/orderRoutes.ts";
+import authRoutes from "./routes/authRoutes";
+
 
 
 dotenv.config();
@@ -12,6 +14,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json()); // para leer JSON en las peticiones
+
+//Ruta autenticacion
+app.use("/auth", authRoutes);
 
 //Ruta base para usuarios
 app.use("/users", userRoutes);

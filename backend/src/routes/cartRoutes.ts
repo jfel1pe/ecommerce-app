@@ -1,11 +1,21 @@
 import { Router } from "express";
-import { addToCart, getCartByUser, removeFromCart, clearCart } from "../controllers/cartController";
+import { addToCart, getCartByUser, removeFromCart, clearCart, getAllCarts, } from "../controllers/cartController";
+import { verifyToken } from "../middleware/authMiddleware";
+import { authorizeRole } from "../middleware/authRole";
+
+/**
+ *  Rutas del carrito protegidas con token
+ */
 
 const router = Router();
 
-router.post("/add", addToCart);
-router.get("/:userId", getCartByUser);
-router.delete("/remove/:cartItemId", removeFromCart);
-router.delete("/clear/:userId", clearCart);
+// Rutas de usuario autenticado
+router.post("/add", verifyToken, addToCart);
+router.get("/", verifyToken, getCartByUser);
+router.delete("/remove/:cartItemId", verifyToken, removeFromCart);
+router.delete("/clear", verifyToken, clearCart);
+
+// Ruta exclusiva para ADMIN
+router.get("/admin/all", verifyToken, authorizeRole(["ADMIN"]), getAllCarts);
 
 export default router;

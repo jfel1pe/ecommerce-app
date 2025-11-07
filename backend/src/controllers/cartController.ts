@@ -1,78 +1,92 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../config/prisma";
+import { AuthRequest } from "../middleware/authMiddleware";
 
 /**
- * 🛒 Agregar producto al carrito
+ * ✅ Agregar producto al carrito del usuario autenticado
  */
-export const addToCart = async (req: Request, res: Response) => {
+export const addToCart = async (req: AuthRequest, res: Response) => {
   try {
-    const { userId, productId, quantity } = req.body;
+    const userId = req.user.id; // 🔒 se toma del token
+    const { productId, quantity } = req.body;
 
-    // 1️⃣ Verificar si el usuario existe
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+    // ✅ Validación de cantidad
+    if (
+      !Number.isInteger(quantity) || // No es entero
+      quantity <= 0 // Es cero o negativo
+    ) {
+      return res
+        .status(400)
+        .json({ error: "La cantidad debe ser un número entero positivo." });
+    }
 
-    // 2️⃣ Verificar si el producto existe
-    const product = await prisma.product.findUnique({ where: { id: productId } });
-    if (!product) return res.status(404).json({ error: "Producto no encontrado" });
+    // ✅ Validar producto
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+    if (!product)
+      return res.status(404).json({ error: "Producto no encontrado" });
 
-    // 3️⃣ Buscar si el usuario ya tiene un carrito
-    let cart = await prisma.cart.findFirst({ where: { userId } });
+    // Buscar carrito existente o crear uno nuevo
+    let cart = await prisma.cart.findFirst({
+      where: { userId },
+      include: { items: true },
+    });
 
-    // Si no tiene, crearlo
     if (!cart) {
       cart = await prisma.cart.create({
         data: { userId, total: 0 },
       });
     }
 
-    // 4️⃣ Verificar si el producto ya está en el carrito
+    // Verificar si el producto ya está en el carrito
     const existingItem = await prisma.cartItem.findFirst({
       where: { cartId: cart.id, productId },
     });
 
-    let updatedItem;
-
     if (existingItem) {
-      // 🔁 Si el producto ya está, actualizamos cantidad y subtotal
-      updatedItem = await prisma.cartItem.update({
+      const newQuantity = existingItem.quantity + quantity;
+
+      // Evitar que quede cantidad negativa o cero
+      if (newQuantity <= 0) {
+        return res
+          .status(400)
+          .json({ error: "La cantidad total no puede ser menor o igual a cero." });
+      }
+
+      await prisma.cartItem.update({
         where: { id: existingItem.id },
         data: {
-          quantity: existingItem.quantity + quantity,
-          subtotal: (existingItem.quantity + quantity) * product.price,
+          quantity: newQuantity,
+          subtotal: newQuantity * product.price,
         },
       });
     } else {
-      // ➕ Si no está, lo agregamos como nuevo
-      updatedItem = await prisma.cartItem.create({
+      await prisma.cartItem.create({
         data: {
           cartId: cart.id,
-          productId: product.id,
+          productId,
           quantity,
           subtotal: quantity * product.price,
         },
       });
     }
 
-    // 5️⃣ Recalcular el total del carrito
-    const items = await prisma.cartItem.findMany({
-      where: { cartId: cart.id },
-      select: { subtotal: true },
-    });
-
-    const total = items.reduce((acc, item) => acc + item.subtotal, 0);
-
-    // 6️⃣ Actualizar el total en el carrito
+    // Recalcular total
     const updatedCart = await prisma.cart.update({
       where: { id: cart.id },
-      data: { total },
-      include: {
-        items: {
-          include: { product: true },
+      data: {
+        total: {
+          set:
+            (
+              await prisma.cartItem.aggregate({
+                where: { cartId: cart.id },
+                _sum: { subtotal: true },
+              })
+            )._sum.subtotal ?? 0,
         },
       },
+      include: { items: { include: { product: true } } },
     });
 
     res.json({
@@ -85,64 +99,108 @@ export const addToCart = async (req: Request, res: Response) => {
   }
 };
 
-// ✅ Obtener carrito de un usuario
-export const getCartByUser = async (req: Request, res: Response) => {
+/**
+ * ✅ Obtener carrito del usuario autenticado
+ */
+export const getCartByUser = async (req: AuthRequest, res: Response) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
 
-    const cart = await prisma.cart.findUnique({
-      where: { userId: Number(userId) },
+    const cart = await prisma.cart.findFirst({
+      where: { userId },
       include: { items: { include: { product: true } } },
     });
 
-    if (!cart) {
-      return res.status(404).json({ error: "Carrito no encontrado" });
-    }
+    if (!cart) return res.status(404).json({ error: "Carrito no encontrado" });
 
-    const total = cart.items.reduce((acc, item) => acc + item.subtotal, 0);
-    res.json({ ...cart, total });
+    res.json(cart);
   } catch (error) {
     console.error("❌ Error en getCartByUser:", error);
     res.status(500).json({ error: "Error al obtener el carrito" });
   }
 };
 
-// ✅ Eliminar un producto del carrito
-export const removeFromCart = async (req: Request, res: Response) => {
+/**
+ * ✅ Eliminar producto del carrito (solo su propio carrito)
+ */
+export const removeFromCart = async (req: AuthRequest, res: Response) => {
   try {
+    const userId = req.user.id;
     const { cartItemId } = req.params;
 
-    await prisma.cartItem.delete({
+    // Verificar que el item pertenece al usuario autenticado
+    const item = await prisma.cartItem.findUnique({
       where: { id: Number(cartItemId) },
+      include: { cart: true },
     });
 
-    res.json({ message: "Producto eliminado del carrito" });
+    if (!item || item.cart.userId !== userId)
+      return res.status(403).json({ error: "No tienes permiso para eliminar este producto" });
+
+    await prisma.cartItem.delete({ where: { id: Number(cartItemId) } });
+
+    // Recalcular total
+    await prisma.cart.update({
+      where: { id: item.cartId },
+      data: {
+        total: {
+          set:
+            (
+              await prisma.cartItem.aggregate({
+                where: { cartId: item.cartId },
+                _sum: { subtotal: true },
+              })
+            )._sum.subtotal ?? 0,
+        },
+      },
+    });
+
+    res.json({ message: "Producto eliminado del carrito correctamente" });
   } catch (error) {
     console.error("❌ Error en removeFromCart:", error);
     res.status(500).json({ error: "Error al eliminar producto del carrito" });
   }
 };
 
-// ✅ Vaciar carrito
-export const clearCart = async (req: Request, res: Response) => {
+/**
+ * ✅ Vaciar el carrito del usuario autenticado
+ */
+export const clearCart = async (req: AuthRequest, res: Response) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
 
-    const cart = await prisma.cart.findUnique({
-      where: { userId: Number(userId) },
-    });
+    const cart = await prisma.cart.findFirst({ where: { userId } });
+    if (!cart) return res.status(404).json({ error: "Carrito no encontrado" });
 
-    if (!cart) {
-      return res.status(404).json({ error: "Carrito no encontrado" });
-    }
+    await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
 
-    await prisma.cartItem.deleteMany({
-      where: { cartId: cart.id },
+    await prisma.cart.update({
+      where: { id: cart.id },
+      data: { total: 0 },
     });
 
     res.json({ message: "Carrito vaciado correctamente" });
   } catch (error) {
     console.error("❌ Error en clearCart:", error);
     res.status(500).json({ error: "Error al vaciar el carrito" });
+  }
+};
+
+/**
+ * 🔒 Solo ADMIN: obtener todos los carritos de todos los usuarios
+ */
+export const getAllCarts = async (req: AuthRequest, res: Response) => {
+  try {
+    const carts = await prisma.cart.findMany({
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        items: { include: { product: true } },
+      },
+    });
+
+    res.json(carts);
+  } catch (error) {
+    console.error("❌ Error en getAllCarts:", error);
+    res.status(500).json({ error: "Error al obtener los carritos" });
   }
 };
