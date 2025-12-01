@@ -3,7 +3,7 @@ import { prisma } from "../config/prisma";
 import { AuthRequest } from "../middleware/authMiddleware";
 
 /**
- * ✅ Crear un nuevo pedido desde el carrito del usuario autenticado
+ *  Crear un nuevo pedido desde el carrito del usuario autenticado
  */
 export const createOrder = async (req: AuthRequest, res: Response) => {
   try {
@@ -65,13 +65,13 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
 
     res.json({ message: "Pedido creado correctamente", order });
   } catch (error) {
-    console.error("❌ Error en createOrder:", error);
+    console.error(" Error en createOrder:", error);
     res.status(500).json({ error: "Error al crear el pedido" });
   }
 };
 
 /**
- * ✅ Obtener todos los pedidos del usuario autenticado
+ *  Obtener todos los pedidos del usuario autenticado
  */
 export const getOrdersByUser = async (req: AuthRequest, res: Response) => {
   try {
@@ -87,13 +87,13 @@ export const getOrdersByUser = async (req: AuthRequest, res: Response) => {
 
     res.json(orders);
   } catch (error) {
-    console.error("❌ Error en getOrdersByUser:", error);
+    console.error(" Error en getOrdersByUser:", error);
     res.status(500).json({ error: "Error al obtener los pedidos" });
   }
 };
 
 /**
- * ✅ Obtener una orden por ID (solo dueño o ADMIN)
+ *  Obtener una orden por ID (solo dueño o ADMIN)
  */
 export const getOrderById = async (req: AuthRequest, res: Response) => {
   try {
@@ -123,13 +123,13 @@ export const getOrderById = async (req: AuthRequest, res: Response) => {
 
     res.json(order);
   } catch (error) {
-    console.error("❌ Error en getOrderById:", error);
+    console.error(" Error en getOrderById:", error);
     res.status(500).json({ error: "Error al obtener la orden" });
   }
 };
 
 /**
- * 🔒 Solo ADMIN: actualizar estado del pedido
+ *  Solo ADMIN: actualizar estado del pedido
  */
 export const updateOrderStatus = async (req: AuthRequest, res: Response) => {
   try {
@@ -148,13 +148,13 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response) => {
 
     res.json({ message: "Estado del pedido actualizado correctamente", order });
   } catch (error) {
-    console.error("❌ Error en updateOrderStatus:", error);
+    console.error(" Error en updateOrderStatus:", error);
     res.status(500).json({ error: "Error al actualizar el estado del pedido" });
   }
 };
 
 /**
- * 🔒 Solo ADMIN: obtener todas las órdenes
+ *  Solo ADMIN: obtener todas las órdenes
  */
 export const getAllOrders = async (req: AuthRequest, res: Response) => {
   try {
@@ -168,7 +168,7 @@ export const getAllOrders = async (req: AuthRequest, res: Response) => {
 
     res.json(orders);
   } catch (error) {
-    console.error("❌ Error en getAllOrders:", error);
+    console.error(" Error en getAllOrders:", error);
     res.status(500).json({ error: "Error al obtener todas las órdenes" });
   }
 };

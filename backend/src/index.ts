@@ -1,3 +1,4 @@
+import cors from "cors";
 import express from "express";
 import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes.ts";
@@ -14,6 +15,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json()); // para leer JSON en las peticiones
+app.use(cors());
 
 //Ruta autenticacion
 app.use("/auth", authRoutes);

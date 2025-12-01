@@ -3,14 +3,14 @@ import { prisma } from "../config/prisma";
 import { AuthRequest } from "../middleware/authMiddleware";
 
 /**
- * ✅ Agregar producto al carrito del usuario autenticado
+ *  Agregar producto al carrito del usuario autenticado
  */
 export const addToCart = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user.id; // 🔒 se toma del token
+    const userId = req.user.id; // se toma del token
     const { productId, quantity } = req.body;
 
-    // ✅ Validación de cantidad
+    // Validación de cantidad
     if (
       !Number.isInteger(quantity) || // No es entero
       quantity <= 0 // Es cero o negativo
@@ -20,7 +20,7 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
         .json({ error: "La cantidad debe ser un número entero positivo." });
     }
 
-    // ✅ Validar producto
+    // Validar producto
     const product = await prisma.product.findUnique({
       where: { id: productId },
     });
@@ -94,13 +94,13 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
       cart: updatedCart,
     });
   } catch (error) {
-    console.error("❌ Error en addToCart:", error);
+    console.error(" Error en addToCart:", error);
     res.status(500).json({ error: "Error al agregar producto al carrito" });
   }
 };
 
 /**
- * ✅ Obtener carrito del usuario autenticado
+ *  Obtener carrito del usuario autenticado
  */
 export const getCartByUser = async (req: AuthRequest, res: Response) => {
   try {
@@ -115,13 +115,13 @@ export const getCartByUser = async (req: AuthRequest, res: Response) => {
 
     res.json(cart);
   } catch (error) {
-    console.error("❌ Error en getCartByUser:", error);
+    console.error("Error en getCartByUser:", error);
     res.status(500).json({ error: "Error al obtener el carrito" });
   }
 };
 
 /**
- * ✅ Eliminar producto del carrito (solo su propio carrito)
+ * Eliminar producto del carrito (solo su propio carrito)
  */
 export const removeFromCart = async (req: AuthRequest, res: Response) => {
   try {
@@ -157,13 +157,13 @@ export const removeFromCart = async (req: AuthRequest, res: Response) => {
 
     res.json({ message: "Producto eliminado del carrito correctamente" });
   } catch (error) {
-    console.error("❌ Error en removeFromCart:", error);
+    console.error(" Error en removeFromCart:", error);
     res.status(500).json({ error: "Error al eliminar producto del carrito" });
   }
 };
 
 /**
- * ✅ Vaciar el carrito del usuario autenticado
+ *  Vaciar el carrito del usuario autenticado
  */
 export const clearCart = async (req: AuthRequest, res: Response) => {
   try {
@@ -181,13 +181,13 @@ export const clearCart = async (req: AuthRequest, res: Response) => {
 
     res.json({ message: "Carrito vaciado correctamente" });
   } catch (error) {
-    console.error("❌ Error en clearCart:", error);
+    console.error(" Error en clearCart:", error);
     res.status(500).json({ error: "Error al vaciar el carrito" });
   }
 };
 
 /**
- * 🔒 Solo ADMIN: obtener todos los carritos de todos los usuarios
+ * Solo ADMIN: obtener todos los carritos de todos los usuarios
  */
 export const getAllCarts = async (req: AuthRequest, res: Response) => {
   try {
@@ -200,7 +200,7 @@ export const getAllCarts = async (req: AuthRequest, res: Response) => {
 
     res.json(carts);
   } catch (error) {
-    console.error("❌ Error en getAllCarts:", error);
+    console.error(" Error en getAllCarts:", error);
     res.status(500).json({ error: "Error al obtener los carritos" });
   }
 };

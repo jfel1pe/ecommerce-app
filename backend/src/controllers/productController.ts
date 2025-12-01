@@ -3,13 +3,13 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// 🟢 Obtener todos los productos
+// Obtener todos los productos
 export const getProducts = async (req: Request, res: Response) => {
   const products = await prisma.product.findMany();
   res.json(products);
 };
 
-// 🟢 Obtener un producto por ID
+// Obtener un producto por ID
 export const getProductById = async (req: Request, res: Response) => {
   const { id } = req.params;
   const product = await prisma.product.findUnique({
@@ -21,7 +21,7 @@ export const getProductById = async (req: Request, res: Response) => {
   res.json(product);
 };
 
-// 🟢 Crear producto
+// Crear producto
 export const createProduct = async (req: Request, res: Response) => {
   try {
     const { name, description, price, category, size, color, stock, imageUrl } = req.body;
@@ -37,7 +37,7 @@ export const createProduct = async (req: Request, res: Response) => {
   }
 };
 
-// 🟡 Actualizar producto
+// Actualizar producto
 export const updateProduct = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { name, description, price, category, size, color, stock, imageUrl } = req.body;
@@ -54,7 +54,7 @@ export const updateProduct = async (req: Request, res: Response) => {
   }
 };
 
-// 🔴 Eliminar producto
+// Eliminar producto
 export const deleteProduct = async (req: Request, res: Response) => {
   const { id } = req.params;
 

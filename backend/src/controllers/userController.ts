@@ -38,7 +38,7 @@ export const createUser = async (req: Request, res: Response) => {
       data: {
         name,
         email,
-        password: hashedPassword, // ✅ Guardamos el hash, no el texto plano
+        password: hashedPassword, // Guardamos el hash, no el texto plano
         role: role || "USER",
       },
     });
@@ -53,7 +53,7 @@ export const createUser = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("❌ Error en createUser:", error);
+    console.error(" Error en createUser:", error);
     res.status(500).json({ error: "Error al crear el usuario" });
   }
 };
