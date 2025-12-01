@@ -19,7 +19,7 @@ export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction)
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    req.user = decoded; // 👈 Guardamos la info del usuario en la request
+    req.user = decoded; // Guardamos la info del usuario en la request
     next();
   } catch (error) {
     console.error(" Error en verifyToken:", error);

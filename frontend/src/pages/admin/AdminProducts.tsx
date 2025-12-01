@@ -31,7 +31,7 @@ const AdminProducts: React.FC = () => {
 
   const token = localStorage.getItem("token");
 
-  // 🔹 Cargar productos desde el backend
+  // Cargar productos desde el backend
   const fetchProducts = async () => {
     try {
       const res = await axios.get("http://localhost:3000/products");
@@ -46,7 +46,7 @@ const AdminProducts: React.FC = () => {
     fetchProducts();
   }, []);
 
-  // 🔹 Manejar cambios en el formulario
+  // Manejar cambios en el formulario
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({
@@ -55,7 +55,7 @@ const AdminProducts: React.FC = () => {
     });
   };
 
-  // 🔹 Crear o actualizar producto
+  // Crear o actualizar producto
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -90,13 +90,13 @@ const AdminProducts: React.FC = () => {
     }
   };
 
-  // 🔹 Editar producto
+  // Editar producto
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setFormData(product);
   };
 
-  // 🔹 Eliminar producto
+  // Eliminar producto
   const handleDelete = async (id: number) => {
     try {
       await axios.delete(`http://localhost:3000/products/${id}`, {
@@ -108,7 +108,7 @@ const AdminProducts: React.FC = () => {
     }
   };
 
-  // 🔹 Filtrar productos por nombre
+  // Filtrar productos por nombre
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);

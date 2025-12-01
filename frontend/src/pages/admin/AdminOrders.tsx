@@ -21,7 +21,7 @@ export default function AdminOrders() {
       });
       setOrders(res.data);
     } catch (error) {
-      console.error("❌ Error al cargar pedidos:", error);
+      console.error(" Error al cargar pedidos:", error);
     } finally {
       setLoading(false);
     }
@@ -38,7 +38,7 @@ export default function AdminOrders() {
       // 🔄 Actualizamos la lista
       fetchOrders();
     } catch (error) {
-      console.error("❌ Error al actualizar estado:", error);
+      console.error(" Error al actualizar estado:", error);
       alert("Error al actualizar el estado del pedido");
     }
   };

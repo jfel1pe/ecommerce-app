@@ -23,7 +23,7 @@ const Login: React.FC = () => {
       localStorage.setItem("role", user.role);
       localStorage.setItem("userId", user.id);
 
-      setMessage("Inicio de sesión exitoso ✅");
+      setMessage("Inicio de sesión exitoso");
 
       // Redirigir según rol
       setTimeout(() => {

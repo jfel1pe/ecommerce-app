@@ -18,7 +18,7 @@ const Register: React.FC = () => {
         password,
       });
 
-      setMessage("Usuario registrado correctamente ✅");
+      setMessage("Usuario registrado correctamente");
       setTimeout(() => navigate("/login"), 1500);
     } catch (error: any) {
       console.error("Error al registrar usuario:", error);

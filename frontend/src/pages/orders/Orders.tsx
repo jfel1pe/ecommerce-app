@@ -42,7 +42,7 @@ export default function Orders() {
 
       setOrders(res.data);
     } catch (err) {
-      console.error("❌ Error al obtener pedidos:", err);
+      console.error(" Error al obtener pedidos:", err);
       setError("No se pudieron obtener los pedidos");
     } finally {
       setLoading(false);
@@ -57,11 +57,11 @@ export default function Orders() {
   if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
 
   if (orders.length === 0)
-    return <p className="text-center mt-10">Aún no has realizado ningún pedido 🧾</p>;
+    return <p className="text-center mt-10">Aún no has realizado ningún pedido</p>;
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">🧾 Mis Pedidos</h1>
+      <h1 className="text-2xl font-bold mb-4">Mis Pedidos</h1>
 
       <div className="space-y-6">
         {orders.map((order) => (
